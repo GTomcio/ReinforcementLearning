@@ -70,7 +70,6 @@ for batch_index in range(num_batches):
         for step_reward in reversed(rewards):
             cumulative_return = step_reward + gamma * cumulative_return
             episode_returns.append(cumulative_return)
-
         episode_returns.reverse()
 
         # Calculate one policy loss for this complete episode.
