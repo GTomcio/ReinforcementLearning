@@ -32,13 +32,13 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.002)
 #auto-break conditions
 succesful_batches = 0
 eval_target = 500.0
-reward_target = 490.0
+reward_target = 475.0
 required_succesful_batches = 1
 
 #training setup
 gamma = 0.99
 batches = 100
-batch_episodes = 30
+batch_episodes = 60
 eval_batch = 5
 position_weight = 0.05
 angle_weight = 0.05
