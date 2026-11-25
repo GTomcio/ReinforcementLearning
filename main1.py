@@ -29,6 +29,13 @@ model = decision().to(DEVICE)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.002)
 
+#auto-break conditions
+succesful_batches = 0
+eval_target = 500.0
+reward_target = 490.0
+required_succesful_batches = 1
+
+#training setup
 gamma = 0.99
 batches = 100
 batch_episodes = 30
@@ -123,19 +130,36 @@ for batch in range(batches):
 
             evaluation_rewards.append(evaluation_reward)
             average_evaluation_reward = sum(evaluation_rewards) / len(evaluation_rewards)
-
+      #print diagnostics
       print(
       f"batch {batch + 1} reward {batch_reward:.2f} "
       f"eval {average_evaluation_reward:.2f}"
       )
+      #break loop
+      if (
+            batch_reward >= reward_target and
+            average_evaluation_reward >= eval_target
+      ):
+            succesful_batches += 1
+      else:
+            succesful_batches = 0
+      #break if conditions met
+      if succesful_batches == required_succesful_batches:
+            print("conditions met; break")
+            break
+      #apply learning
       optimizer.zero_grad()
       batch_loss.backward()
       optimizer.step()
-
+#close envs
 train_env.close()
 eval_env.close()
-
+#show results
 render_env = gym.make(ENV_ID, render_mode="human")
+render_env.unwrapped.metadata = {
+      **render_env.unwrapped.metadata,
+      "render_fps": 30,
+}
 observation, info = render_env.reset()
 terminated = False
 truncated = False
