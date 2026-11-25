@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import gymnasium as gym
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 #global enviroment setup
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -187,11 +188,16 @@ render_env.close()
 figure, axes = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
 axes[0].plot(batch_numbers, training_reward_history)
 axes[0].set_ylabel("Average shaped training reward")
+axes[0].set_ylim(0, 500)
+axes[0].set_xlim(0, 100)
 axes[0].grid(True)
 
 axes[1].plot(batch_numbers, evaluation_reward_history)
 axes[1].set_ylabel("Average raw evaluation reward")
 axes[1].set_xlabel("Batch")
+axes[1].set_ylim(0, 500)
+axes[1].set_xlim(0, 100)
+axes[1].xaxis.set_major_locator(MaxNLocator(integer=True))
 axes[1].grid(True)
 
 figure.suptitle("CartPole training progress")
