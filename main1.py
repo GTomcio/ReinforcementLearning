@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import gymnasium as gym
+import matplotlib.pyplot as plt
 
 #global enviroment setup
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,7 +28,7 @@ class decision(nn.Module):
 
 model = decision().to(DEVICE)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.002)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 #auto-break conditions
 succesful_batches = 0
@@ -37,11 +38,14 @@ required_succesful_batches = 1
 
 #training setup
 gamma = 0.99
-batches = 100
+batches = 20
 batch_episodes = 60
 eval_batch = 5
 position_weight = 0.05
 angle_weight = 0.05
+batch_numbers = []
+training_reward_history = []
+evaluation_reward_history = []
 
 for batch in range(batches):
       episode_losses = []
@@ -130,6 +134,9 @@ for batch in range(batches):
 
             evaluation_rewards.append(evaluation_reward)
             average_evaluation_reward = sum(evaluation_rewards) / len(evaluation_rewards)
+      batch_numbers.append(batch + 1)
+      training_reward_history.append(batch_reward)
+      evaluation_reward_history.append(average_evaluation_reward)
       #print diagnostics
       print(
       f"batch {batch + 1} reward {batch_reward:.2f} "
@@ -175,3 +182,18 @@ while not terminated and not truncated:
       observation, reward, terminated, truncated, info = render_env.step(action)
 
 render_env.close()
+
+# Plot the two reward measures separately because their scales differ.
+figure, axes = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
+axes[0].plot(batch_numbers, training_reward_history)
+axes[0].set_ylabel("Average shaped training reward")
+axes[0].grid(True)
+
+axes[1].plot(batch_numbers, evaluation_reward_history)
+axes[1].set_ylabel("Average raw evaluation reward")
+axes[1].set_xlabel("Batch")
+axes[1].grid(True)
+
+figure.suptitle("CartPole training progress")
+figure.tight_layout()
+plt.show()
