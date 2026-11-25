@@ -27,14 +27,14 @@ class decision(nn.Module):
 
 model = decision().to(DEVICE)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.002)
 
 gamma = 0.99
-batches = 20
-batch_episodes = 100
-eval_batch = 10
-position_weight = 0.01
-angle_weight = 0.01
+batches = 100
+batch_episodes = 30
+eval_batch = 5
+position_weight = 0.05
+angle_weight = 0.05
 
 for batch in range(batches):
       episode_losses = []
@@ -108,19 +108,19 @@ for batch in range(batches):
             terminated = False
             truncated = False
             evaluation_reward = 0.0
-      
+
             while not terminated and not truncated:
                   observation_tensor = torch.tensor(
                       observation, dtype=torch.float32, device=DEVICE
                   )
-      
+
                   with torch.no_grad():
                       action_scores = model(observation_tensor)
                       action = int(torch.argmax(action_scores).item())
-      
+
                   observation, reward, terminated, truncated, info = eval_env.step(action)
                   evaluation_reward += float(reward)
-      
+
             evaluation_rewards.append(evaluation_reward)
             average_evaluation_reward = sum(evaluation_rewards) / len(evaluation_rewards)
 
@@ -131,7 +131,23 @@ for batch in range(batches):
       optimizer.zero_grad()
       batch_loss.backward()
       optimizer.step()
-            
+
 train_env.close()
 eval_env.close()
-      
+
+render_env = gym.make(ENV_ID, render_mode="human")
+observation, info = render_env.reset()
+terminated = False
+truncated = False
+
+while not terminated and not truncated:
+      observation_tensor = torch.tensor(
+            observation, dtype=torch.float32, device=DEVICE
+      )
+
+      with torch.no_grad():
+            action = int(torch.argmax(model(observation_tensor)).item())
+
+      observation, reward, terminated, truncated, info = render_env.step(action)
+
+render_env.close()
