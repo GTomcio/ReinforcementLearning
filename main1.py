@@ -29,7 +29,7 @@ class decision(nn.Module):
 
 model = decision().to(DEVICE)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 #auto-break conditions
 succesful_batches = 0
